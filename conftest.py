@@ -4,6 +4,7 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
+import time
 
 @pytest.fixture(params=["chrome", "firefox"])
 def browser(request):
@@ -18,3 +19,6 @@ def browser(request):
     
     yield driver
     driver.quit()
+
+def pytest_runtest_teardown(item, nextitem):
+    time.sleep(3)

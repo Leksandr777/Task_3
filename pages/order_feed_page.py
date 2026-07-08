@@ -9,7 +9,7 @@ class OrderFeedPage(BasePage):
         self.locators = OrderFeedLocators()
 
     def wait_for_orders_list(self):
-        """Ждёт появления контейнера со списком заказов (по твоему локатору ORDERS_LIST)."""
+
         WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located(self.locators.ORDERS_LIST)
         )
@@ -34,12 +34,10 @@ class OrderFeedPage(BasePage):
         return order_number_elem.text
     
     def get_all_order_numbers_from_list(self) -> list[str]:
-        # Ждём, пока появится хотя бы один номер заказа.
-        # Это решает проблему асинхронной подгрузки (WebSocket) и «пустого» списка.
+
         WebDriverWait(self.driver, 30).until(
             lambda d: len(d.find_elements(*self.locators.ORDER_NUMBER_IN_LIST)) > 0
         )
 
-        # Как только номера появились — сразу забираем их все.
         numbers_elements = self.driver.find_elements(*self.locators.ORDER_NUMBER_IN_LIST)
         return [el.text.strip() for el in numbers_elements]

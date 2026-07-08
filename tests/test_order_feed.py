@@ -1,15 +1,16 @@
 from pages.login_page import LoginPage
 import pytest
+import allure
 from pages.main_page import MainPage
-from locators.main_page_locators import MainPageLocators
-from locators.order_feed_locators import OrderFeedLocators
-from selenium.webdriver.support.ui import WebDriverWait
+#from locators.main_page_locators import MainPageLocators
+#from locators.order_feed_locators import OrderFeedLocators
+#from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from helpers import create_user, delete_user
 from selenium.webdriver.common.action_chains import ActionChains
-import time
 from pages.order_feed_page import OrderFeedPage
 
+@allure.feature("Лента заказов и синхронизация")
 class TestOrderFeed:
 
     @pytest.fixture(autouse=True)
@@ -21,6 +22,7 @@ class TestOrderFeed:
         yield
         delete_user(self.user)   
 
+    @allure.story("Просмотр деталей первого заказа в ленте")
     def test_order_feed(self):
 
         self.main_page.open()
@@ -29,7 +31,7 @@ class TestOrderFeed:
 
         assert order_number.startswith('#'), f"Номер заказа указан некорректно"
         
-
+    @allure.story("Синхронизация заказов между историей и лентой")
     def test_orders_synchronization(self):
         # 1. Авторизация
         self.login_page.open()
@@ -56,7 +58,7 @@ class TestOrderFeed:
             f"История: {history_numbers}\nЛента: {feed_numbers}"
         )
     
-
+    @allure.story("Проверка увеличения счётчиков заказов после создания заказа")
     def test_counter_orders(self, browser):
         # 1. Авторизация (методы LoginPage)
         self.login_page.open()
@@ -69,10 +71,9 @@ class TestOrderFeed:
 
         self.main_page.go_to_main_and_wait_cabinet_link()
 
-        # Клик «Конструктор»
+
         self.main_page.go_to_constructor()
 
-        # Драг булки (твой JS-драг — самый стабильный вариант)
         self.main_page.drag_first_bun_to_basket()
 
 
@@ -87,6 +88,7 @@ class TestOrderFeed:
             f"Счётчик заказов за сегодня не увеличился: было {initial_today}, стало {final_today}"
         )
         
+    @allure.story("Заказ отображается в разделе «В работе»")        
     def test_order_in_work(self, browser):
         self.login_page.open()
         self.login_page.enter_email(self.user['email'])

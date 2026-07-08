@@ -11,18 +11,12 @@ class MainPageLocators:
     INGREDIENTS_LIST = (By.XPATH, "//div[contains(@class, 'BurgerIngredients_ingredients__menuContainer')]")
     FIRST_SAUCE_INGREDIENT = (By.XPATH, "//a[contains(@href, '/ingredient/691577430cc94f001a65b862') and contains(@class, 'BurgerIngredient_ingredient__1TVf6')]")
 
-    FIRST_BUN_INGREDIENT = (
-        By.XPATH, 
-        "//ul[contains(@class, 'BurgerIngredients_ingredients__list__2A-mT')]/a[1]"
-    )    
+    FIRST_BUN_INGREDIENT = (By.XPATH,"//ul[contains(@class, 'BurgerIngredients_ingredients__list__2A-mT')]/a[1]")    
     DROP_AREA = (By.CSS_SELECTOR, ".BurgerConstructor_basket__listItem__aWMu1")
     INGREDIENT_COUNTER =  (By.XPATH,"//a[contains(@href, '/ingredient/691577430cc94f001a65b862')]//div[contains(@class, 'counter_counter__ZNLkj')]//p[@class='counter_counter__num__3nue1']")
     ORDER_ID = (By.XPATH, "//h2[contains(@class, 'Modal_modal__title_shadow__3ikwq')]")
     MODAL_TITLE = (By.XPATH, "//p[contains(text(), 'идентификатор заказа')]")
     ORDER_MESSAGE = (By.XPATH, "//p[contains(text(), 'Ваш заказ начали готовить')]")
     ORDER_BUTTON = (By.XPATH, "//button[contains(@class, 'button_button_type_primary__1O7Bx') and contains(text(), 'Оформить заказ')]")
-    MODAL_CLOSE_BUTTON = (
-        By.XPATH, 
-        "//button[contains(@class, 'Modal_modal__close_modified__3V5XS')]"
-    )
+    MODAL_CLOSE_BUTTON = (By.XPATH, "//button[contains(@class, 'Modal_modal__close_modified__3V5XS')]")
     ORDER_HISTORY_LINK = (By.XPATH, "//a[contains(text(), 'История заказов')]") 

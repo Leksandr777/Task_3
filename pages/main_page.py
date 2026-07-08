@@ -56,7 +56,6 @@ class MainPage(BasePage):
         )
 
     def go_to_constructor(self):
-        # 1. Ждём и кликаем кнопку «Конструктор»
         btn = self.wait_until_clickable(self.locators.CONSTRUCTOR_BUTTON)
         btn.click()
 
@@ -159,7 +158,7 @@ class MainPage(BasePage):
         return self
     
     def get_order_id(self):
-        """Возвращает номер заказа как int (с валидацией)."""
+
         el = WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(self.locators.ORDER_ID)
         )
@@ -188,11 +187,9 @@ class MainPage(BasePage):
             EC.visibility_of_element_located(self.locators.DROP_AREA)
         )
 
-        # 2. Прокрутка, чтобы точно видеть элементы (особенно важно для Firefox)
         self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", bun)
         self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", drop_area)
 
-        # 3. JS-драг (тот же самый, что у тебя уже работает)
         js_drag_script = """
             var src = arguments[0];
             var tgt = arguments[1];
@@ -203,8 +200,6 @@ class MainPage(BasePage):
         """
         self.driver.execute_script(js_drag_script, bun, drop_area)
 
-        # 4. НИКАКИХ ожиданий счётчика ингредиентов здесь нет.
-        # Булка не увеличивает INGREDIENT_COUNTER, поэтому ждать его — тупик.
         
         return self
 
@@ -221,9 +216,6 @@ class MainPage(BasePage):
         # Ждём появления элемента с номером заказа
         order_id_elem = wait.until(EC.visibility_of_element_located(self.locators.ORDER_ID))
 
-        # ГЛАВНОЕ: ждём, пока текст НЕ РАВЕН "9999".
-        # Как только он станет другим (реальный ID) — ожидание закончится.
-        # Если так и останется "9999" дольше 20 сек — тест упадёт по таймауту, это нормально.
         wait.until(lambda d: order_id_elem.text.strip() != "9999")
 
         # Берём уже реальный ID и добавляем ноль
@@ -237,14 +229,14 @@ class MainPage(BasePage):
         return formatted_id
     
     def go_to_profile_and_orders_history(self):
-        """Ждёт и кликает Личный кабинет -> История заказов."""
-        # Личный кабинет
+
+
         cab_btn = WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable(self.locators.PERSONAL_CABINET_LINK)
         )
         cab_btn.click()
 
-        # История заказов
+
         history_btn = WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable(self.locators.ORDER_HISTORY_LINK)
         )
@@ -252,12 +244,7 @@ class MainPage(BasePage):
         return self
 
     def get_feed_counters(self):
-        """
-        Гарантированно переходит на ленту заказов и возвращает кортеж:
-        (total_orders, today_orders).
-        Все ожидания и проверки — внутри метода.
-        """
-        # Если мы не на ленте — переходим (используем твой существующий go_to_feed)
+
         current_url = self.driver.current_url
         if "/feed" not in current_url:
             self.go_to_feed()
@@ -277,10 +264,7 @@ class MainPage(BasePage):
         return total, today
 
     def go_to_main_and_wait_cabinet_link(self):
-        """
-        Переход на главную через browser.get и ожидание кнопки ЛК.
-        Это нужно, чтобы корректно нажать «Конструктор» после закрытия модалки.
-        """
+
         self.driver.get(self.base_url)
 
         from selenium.webdriver.support import expected_conditions as EC
@@ -302,13 +286,12 @@ class MainPage(BasePage):
 
         wait = WebDriverWait(self.driver, 20)
 
-        # Прямой переход на ленту (как в твоём коде)
+
         self.driver.get("https://qa-stellarburgers.education-services.ru/feed")
 
-        # Ждём контейнер списка заказов
+
         wait.until(EC.presence_of_element_located(OrderFeedLocators.ORDERS_LIST))
 
-        # Ждём, пока исчезнет заглушка «Нет заказов»
         wait.until_not(EC.presence_of_element_located(OrderFeedLocators.NO_ORDERS_MESSAGE))
 
         # Получаем список заказов
