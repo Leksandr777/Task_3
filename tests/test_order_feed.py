@@ -2,25 +2,15 @@ from pages.login_page import LoginPage
 import pytest
 import allure
 from pages.main_page import MainPage
-#from locators.main_page_locators import MainPageLocators
-#from locators.order_feed_locators import OrderFeedLocators
-#from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from helpers import create_user, delete_user
 from selenium.webdriver.common.action_chains import ActionChains
 from pages.order_feed_page import OrderFeedPage
 
 @allure.feature("Лента заказов и синхронизация")
+@pytest.mark.usefixtures("setup_pages_and_user")
 class TestOrderFeed:
 
-    @pytest.fixture(autouse=True)
-    def setup(self, browser):
-        self.login_page = LoginPage(browser)
-        self.main_page = MainPage(browser)
-        self.order_feed_page = OrderFeedPage(browser)
-        self.user = create_user()
-        yield
-        delete_user(self.user)   
 
     @allure.story("Просмотр деталей первого заказа в ленте")
     def test_order_feed(self):
@@ -59,7 +49,7 @@ class TestOrderFeed:
         )
     
     @allure.story("Проверка увеличения счётчиков заказов после создания заказа")
-    def test_counter_orders(self, browser):
+    def test_counter_orders(self):
         # 1. Авторизация (методы LoginPage)
         self.login_page.open()
         self.login_page.enter_email(self.user['email'])
@@ -89,7 +79,7 @@ class TestOrderFeed:
         )
         
     @allure.story("Заказ отображается в разделе «В работе»")        
-    def test_order_in_work(self, browser):
+    def test_order_in_work(self):
         self.login_page.open()
         self.login_page.enter_email(self.user['email'])
         self.login_page.enter_password(self.user['password'])
@@ -104,13 +94,6 @@ class TestOrderFeed:
         self.main_page.go_to_feed()
 
 
-        orders_in_work = self.main_page.get_orders_in_work()
+        orders_texts = [o.text.strip() for o in self.main_page.get_orders_in_work()]
 
-        order_found = False
-        for order in orders_in_work:
-            current_order_id = order.text.strip()
-            if current_order_id == str(order_id):
-                order_found = True
-                break
-
-        assert order_found, f"Заказ {order_id} не найден в разделе 'В работе'"
+        assert str(order_id) in orders_texts, f"Заказ {order_id} не найден в ленте заказов"

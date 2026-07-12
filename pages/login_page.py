@@ -3,6 +3,7 @@ from locators.login_page_locators import LoginPageLocators
 import time
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from constant import LOGIN_PAGE_URL
 
 class LoginPage(BasePage):
 
@@ -13,8 +14,7 @@ class LoginPage(BasePage):
 
 
     def open(self):
-        login_url = f"{self.base_url}login"
-        self.driver.get(login_url)
+        self.open_url(LOGIN_PAGE_URL)
  
         self.wait_until_clickable(self.locators.EMAIL_INPUT)
 
@@ -60,8 +60,11 @@ class LoginPage(BasePage):
         link.click()
         return self
     
+   
     def logout(self):
         self.wait_for_logout_button_clickable()
         btn = self.wait_until_clickable(self.locators.LOGOUT_BUTTON)
         btn.click()
         return self
+
+

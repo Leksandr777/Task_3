@@ -1,9 +1,6 @@
 import requests
 import random
-
-BASE_REGISTER_URL = "https://qa-stellarburgers.education-services.ru/api/auth/register"
-
-BASE_DELETE_URL = "https://qa-stellarburgers.education-services.ru/api/auth/user"
+from constant import BASE_REGISTER_URL, BASE_DELETE_URL
 
 def create_user():
     suffix = random.randint(1, 10000)

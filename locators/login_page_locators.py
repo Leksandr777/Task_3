@@ -10,3 +10,4 @@ class LoginPageLocators:
     RECOVERY_PASSWORD_LINK = (By.XPATH, "//a[contains(@href, '/forgot-password')]")
     ERROR_MESSAGE = (By.CSS_SELECTOR, ".error-message")
     ORDER_BUTTON = (By.XPATH, "//button[contains(@class, 'button_button__33qZ0') and contains(text(), 'Оформить заказ')]")
+

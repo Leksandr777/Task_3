@@ -10,34 +10,24 @@ class OrderFeedPage(BasePage):
 
     def wait_for_orders_list(self):
 
-        WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located(self.locators.ORDERS_LIST)
-        )
+        self.find_element(self.locators.ORDERS_LIST, timeout=10)
         return self
 
     def open_first_order_details(self):
 
         self.wait_for_orders_list()
         
-        first_order = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable(self.locators.FIRST_ORDER)
-        )
+        first_order = self.wait_until_clickable(self.locators.FIRST_ORDER, timeout=10)
         first_order.click()
 
-        WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located(self.locators.ORDER_DETAILS_MODAL)
-        )
+        self.find_element(self.locators.ORDER_DETAILS_MODAL, timeout=10)
 
-        order_number_elem = WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located(self.locators.ORDER_NUMBER)
-        )
+        order_number_elem = self.wait_until_visible(self.locators.ORDER_NUMBER, timeout=10)
         return order_number_elem.text
     
     def get_all_order_numbers_from_list(self) -> list[str]:
 
-        WebDriverWait(self.driver, 30).until(
-            lambda d: len(d.find_elements(*self.locators.ORDER_NUMBER_IN_LIST)) > 0
-        )
+        self.wait_until_at_least_one_element(self.locators.ORDER_NUMBER_IN_LIST, timeout=30 )
 
-        numbers_elements = self.driver.find_elements(*self.locators.ORDER_NUMBER_IN_LIST)
+        numbers_elements = self.find_elements(self.locators.ORDER_NUMBER_IN_LIST, timeout=10)
         return [el.text.strip() for el in numbers_elements]

@@ -4,7 +4,9 @@ from locators.Ingredient_modal_locators import IngredientModalLocators
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from locators.main_page_locators import MainPageLocators
+from locators.order_feed_locators import OrderFeedLocators
 from selenium.webdriver.common.action_chains import ActionChains
+from constant import FEED_URL,FULL_FEED_URL
 
 class MainPage(BasePage):
     
@@ -14,10 +16,8 @@ class MainPage(BasePage):
         self.modal_locators = IngredientModalLocators()
 
     def open(self):
-        self.driver.get(self.base_url)
-        WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located(self.locators.CONSTRUCTOR_BUTTON)
-        )
+        self.open_url(self.base_url)
+        self.find_element(self.locators.CONSTRUCTOR_BUTTON, timeout=10)
 
     def go_to_personal_cabinet(self):
         btn = self.wait_until_clickable(self.locators.PERSONAL_CABINET_LINK)
@@ -37,7 +37,7 @@ class MainPage(BasePage):
         return self
     
     def waiting_for_user_logged_in(self):
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(self.locators.ORDER_BUTTON)) is not None
+        self.find_element(self.locators.ORDER_BUTTON, timeout=10) is not None
         return self
     
     def wait_for_logout_button_clickable(self):
@@ -52,7 +52,7 @@ class MainPage(BasePage):
 
 
         WebDriverWait(self.driver, 15).until(
-            EC.url_contains("/feed")
+            EC.url_contains(FEED_URL)
         )
 
     def go_to_constructor(self):
@@ -78,9 +78,7 @@ class MainPage(BasePage):
         close_btn = self.wait_until_clickable(self.modal_locators.CLOSE_BUTTON, timeout=20)
         close_btn.click()
 
-        WebDriverWait(self.driver, 20).until(
-            EC.invisibility_of_element_located(self.modal_locators.MODAL_BACKDROP)
-        )
+        self.wait_until_backdrop_disappears(self.modal_locators.MODAL_BACKDROP, timeout=20)
 
         self.wait_until_visible(self.locators.CONSTRUCTOR_HEADER, timeout=20)
         return self
@@ -92,27 +90,19 @@ class MainPage(BasePage):
     
 
     def drag_and_drop_ingredient(self, ingredient_locator, drop_area_locator):
-        WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located(self.locators.INGREDIENTS_LIST)
-        )
+        self.find_element(self.locators.INGREDIENTS_LIST, timeout=10)
 
-        ingredient_el = WebDriverWait(self.driver, 15).until(
-            EC.element_to_be_clickable(ingredient_locator)
+        ingredient_el = self.wait_until_clickable(ingredient_locator, timeout=15)
+        drop_area_el = self.wait_until_visible(drop_area_locator, timeout=15)
+        self.execute_script(
+            "arguments[0].scrollIntoView({block: 'center', inline: 'center'});",
+            ingredient_el
         )
-        drop_area_el = WebDriverWait(self.driver, 15).until(
-            EC.visibility_of_element_located(drop_area_locator)
+        self.execute_script(
+            "arguments[0].scrollIntoView({block: 'center', inline: 'center'});",
+            drop_area_el
         )
-
-        self.driver.execute_script(
-            "arguments[0].scrollIntoView({block: 'center', inline: 'center'});", ingredient_el
-        )
-        self.driver.execute_script(
-            "arguments[0].scrollIntoView({block: 'center', inline: 'center'});", drop_area_el
-        )
-
-        initial_counter = WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located(self.locators.INGREDIENT_COUNTER)
-        )
+        initial_counter = self.wait_until_visible(self.locators.INGREDIENT_COUNTER, timeout=10)
         initial_value = int(initial_counter.text)
         expected_value = str(initial_value + 1)
 
@@ -132,63 +122,48 @@ class MainPage(BasePage):
             src.dispatchEvent(new DragEvent('dragend', {bubbles: true, cancelable: true}));
         """
         
-        self.driver.execute_script(js_drag_script, ingredient_el, drop_area_el)
+        self.execute_script(js_drag_script, ingredient_el, drop_area_el)
 
-        WebDriverWait(self.driver, 15).until(
-            EC.text_to_be_present_in_element(
-                self.locators.INGREDIENT_COUNTER,
-                expected_value
-            )
+        self.wait_text_to_be_present_in_element(
+            self.locators.INGREDIENT_COUNTER,
+            expected_value,
+            timeout=15
         )
 
         return self
     
 
     def click_order_button(self):
-        order_button = WebDriverWait(self.driver, 15).until(
-            EC.element_to_be_clickable(self.locators.ORDER_BUTTON)
-        )
+        order_button = self.wait_until_clickable(self.locators.ORDER_BUTTON, timeout=15)
         order_button.click()
         return self
     
     def wait_for_order_modal(self):
-        WebDriverWait(self.driver, 15).until(
-            EC.visibility_of_element_located(self.locators.ORDER_ID)
-        )
+        self.wait_until_visible(self.locators.ORDER_ID, timeout=15)
         return self
     
     def get_order_id(self):
 
-        el = WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located(self.locators.ORDER_ID)
-        )
+        el = self.wait_until_visible(self.locators.ORDER_ID, timeout=10)
         text = el.text.strip()
         return int(text)
     
     def get_modal_title(self):
-        el = WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located(self.locators.MODAL_TITLE)
-        )
+        el = self.wait_until_visible(self.locators.MODAL_TITLE, timeout=10)
         return el.text.strip()
 
     def get_order_message(self):
-        el = WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located(self.locators.ORDER_MESSAGE)
-        )
+        el = self.wait_until_visible(self.locators.ORDER_MESSAGE, timeout=10)
         return el.text.strip()
     
 
     def drag_first_bun_to_basket(self):
         # 1. Ждём элементы
-        bun = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable(self.locators.FIRST_BUN_INGREDIENT)
-        )
-        drop_area = WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located(self.locators.DROP_AREA)
-        )
+        bun = self.wait_until_clickable(self.locators.FIRST_BUN_INGREDIENT, timeout=10)
+        drop_area = self.wait_until_visible(self.locators.DROP_AREA, timeout=10)
 
-        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", bun)
-        self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", drop_area)
+        self.execute_script("arguments[0].scrollIntoView({block: 'center'});", bun)
+        self.execute_script("arguments[0].scrollIntoView({block: 'center'});", drop_area)
 
         js_drag_script = """
             var src = arguments[0];
@@ -198,7 +173,7 @@ class MainPage(BasePage):
             tgt.dispatchEvent(new DragEvent('drop', {bubbles: true, cancelable: true}));
             src.dispatchEvent(new DragEvent('dragend', {bubbles: true, cancelable: true}));
         """
-        self.driver.execute_script(js_drag_script, bun, drop_area)
+        self.execute_script(js_drag_script, bun, drop_area)
 
         
         return self
@@ -207,46 +182,40 @@ class MainPage(BasePage):
     def place_order_and_close_modal(self) -> str:
         from selenium.webdriver.support import expected_conditions as EC
 
-        wait = WebDriverWait(self.driver, 20)
 
-        # Клик по кнопке заказа
-        order_btn = wait.until(EC.element_to_be_clickable(self.locators.ORDER_BUTTON))
+        order_btn = self.wait_until_clickable(self.locators.ORDER_BUTTON, timeout=20)
         order_btn.click()
 
-        # Ждём появления элемента с номером заказа
-        order_id_elem = wait.until(EC.visibility_of_element_located(self.locators.ORDER_ID))
+        order_id_elem = self.wait_until_visible(self.locators.ORDER_ID, timeout=20)
 
-        wait.until(lambda d: order_id_elem.text.strip() != "9999")
+        self.wait_until_text_not_equal(
+            self.locators.ORDER_ID,
+            "9999",
+            timeout=20
+        )
 
-        # Берём уже реальный ID и добавляем ноль
         real_id = order_id_elem.text.strip()
         formatted_id = f"0{real_id}"
 
-        # Закрываем модалку
-        close_btn = wait.until(EC.element_to_be_clickable(self.locators.MODAL_CLOSE_BUTTON))
-        self.driver.execute_script("arguments[0].click();", close_btn)
+        close_btn = self.wait_until_clickable(self.locators.MODAL_CLOSE_BUTTON, timeout=20)
+        self.execute_script("arguments[0].click();", close_btn)
 
         return formatted_id
     
     def go_to_profile_and_orders_history(self):
 
 
-        cab_btn = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable(self.locators.PERSONAL_CABINET_LINK)
-        )
+        cab_btn = self.wait_until_clickable(self.locators.PERSONAL_CABINET_LINK, timeout=10)
         cab_btn.click()
 
-
-        history_btn = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable(self.locators.ORDER_HISTORY_LINK)
-        )
+        history_btn = self.wait_until_clickable(self.locators.ORDER_HISTORY_LINK, timeout=10)
         history_btn.click()
         return self
 
     def get_feed_counters(self):
 
-        current_url = self.driver.current_url
-        if "/feed" not in current_url:
+        current_url = self.get_current_url()
+        if FEED_URL not in current_url:
             self.go_to_feed()
 
         from selenium.webdriver.support import expected_conditions as EC
@@ -255,8 +224,8 @@ class MainPage(BasePage):
         wait = WebDriverWait(self.driver, 15)
 
         # Ждём видимости счётчиков (вместо голого find_element)
-        total_el = wait.until(EC.visibility_of_element_located(OrderFeedLocators.TOTAL_ORDERS_COUNTER))
-        today_el = wait.until(EC.visibility_of_element_located(OrderFeedLocators.TODAY_ORDERS_COUNTER))
+        total_el = self.wait_until_visible(OrderFeedLocators.TOTAL_ORDERS_COUNTER, timeout=15)
+        today_el = self.wait_until_visible(OrderFeedLocators.TODAY_ORDERS_COUNTER, timeout=15)
 
         total = int(total_el.text.strip())
         today = int(today_el.text.strip())
@@ -265,35 +234,26 @@ class MainPage(BasePage):
 
     def go_to_main_and_wait_cabinet_link(self):
 
-        self.driver.get(self.base_url)
-
-        from selenium.webdriver.support import expected_conditions as EC
-
-        wait = WebDriverWait(self.driver, 10)
-        wait.until(EC.presence_of_element_located(self.locators.PERSONAL_CABINET_LINK))
+        self.open_url(self.base_url)
+        self.find_element(self.locators.PERSONAL_CABINET_LINK, timeout=10)
         return self
     
 
     def wait_until_no_orders_message_disappears(self):
-        from selenium.webdriver.support import expected_conditions as EC
-        wait = WebDriverWait(self.driver, 15)
-        wait.until_not(EC.presence_of_element_located(self.locators.NO_ORDERS_MESSAGE))
+        self.wait_until_element_disappears(self.locators.NO_ORDERS_MESSAGE,timeout=15 )
         return self
 
     def get_orders_in_work(self):
-        from selenium.webdriver.support import expected_conditions as EC
-        from locators.order_feed_locators import OrderFeedLocators
 
         wait = WebDriverWait(self.driver, 20)
 
 
-        self.driver.get("https://qa-stellarburgers.education-services.ru/feed")
+        self.open_url(FULL_FEED_URL)
 
 
-        wait.until(EC.presence_of_element_located(OrderFeedLocators.ORDERS_LIST))
+        self.find_element(OrderFeedLocators.ORDERS_LIST, timeout=20)
 
-        wait.until_not(EC.presence_of_element_located(OrderFeedLocators.NO_ORDERS_MESSAGE))
+        self.wait_until_element_disappears(OrderFeedLocators.NO_ORDERS_MESSAGE,timeout=20)
 
-        # Получаем список заказов
-        orders = self.driver.find_elements(*OrderFeedLocators.ORDERS_IN_WORK)
+        orders = self.find_elements(OrderFeedLocators.ORDERS_IN_WORK, timeout=20)
         return orders

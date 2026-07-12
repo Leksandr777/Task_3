@@ -3,18 +3,15 @@ import pytest
 from pages.login_page import LoginPage
 from pages.password_recovery_page import PasswordRecoveryPage
 from pages.reset_password_page import ResetPasswordPage
+from pages.main_page import MainPage
 from helpers import create_user, delete_user
+from constant import FORGOT_PASSWORD_URL, RESET_PASSWORD_URL
 
 @allure.feature("Восстановление пароля")
+@pytest.mark.usefixtures("setup_pages_and_user")
 class TestPasswordReset:
 
-    @pytest.fixture(autouse=True)
-    def setup(self, browser):
-        self.login_page = LoginPage(browser)
-        self.user = create_user()
-        
-        yield
-        delete_user(self.user)
+
 
     @allure.story("Переход по ссылке Восстановление пароля")
     def test_reset_password_link(self, browser):
@@ -23,7 +20,7 @@ class TestPasswordReset:
 
         login_page.click_recovery_password_link()
 
-        assert "forgot-password" in browser.current_url
+        assert FORGOT_PASSWORD_URL in browser.current_url
 
     @allure.story("Отправка email для сброса пароля")
     def test_email_reset_success(self):
@@ -37,8 +34,7 @@ class TestPasswordReset:
         
         recovery_page.click_recovery_button()
 
-        assert "/reset-password" in self.login_page.driver.current_url, \
-            f"Ожидался переход на /reset-password"
+        assert self.login_page.is_url_contains(RESET_PASSWORD_URL)
 
     @allure.story("Переключение переключателя видимости парооля")
     def test_show_password(self):

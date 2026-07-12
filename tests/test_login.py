@@ -6,18 +6,13 @@ from pages.main_page import MainPage
 from helpers import create_user, delete_user
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from constant import LOGIN_PAGE_URL, ORDER_HISTORY_URL
 
 @allure.feature("Авторизация")
+@pytest.mark.usefixtures("setup_pages_and_user")
 class TestLogin:
 
-    @pytest.fixture(autouse=True)
-    def setup(self, browser):
-        self.login_page = LoginPage(browser)
-        self.main_page = MainPage(browser)
-        self.user = create_user()  
 
-        yield
-        delete_user(self.user)  
 
     @allure.story("Успешная авторизация пользователя")
     def test_successful_login(self):
@@ -39,7 +34,8 @@ class TestLogin:
         self.main_page.waiting_for_user_logged_in()
         self.main_page.go_to_personal_cabinet()
         self.main_page.go_to_order_history()
-        assert "/account/order-history" in self.login_page.driver.current_url
+        assert self.login_page.is_url_contains(ORDER_HISTORY_URL)
+
 
     @allure.story("Выход из аккаунта (logout)")
     def test_logout(self):
@@ -48,14 +44,12 @@ class TestLogin:
         self.login_page.enter_password(self.user['password'])
         self.login_page.click_login_button()
         
-        # Ждем появления кнопки личного кабинета
+
         self.main_page.waiting_for_user_logged_in()
         self.main_page.go_to_personal_cabinet()       
         self.main_page.logout()
-        expected_url = "https://qa-stellarburgers.education-services.ru/login"
-        WebDriverWait(self.login_page.driver, 10).until(
-            EC.url_to_be(expected_url)
-        )
+        expected_url = LOGIN_PAGE_URL
+        self.login_page.wait_url_to_be(expected_url, timeout=10)
         
-        assert self.login_page.driver.current_url == expected_url, \
-            f"Ожидался URL: {expected_url}, но получен: {self.login_page.driver.current_url}"
+        current_url = self.login_page.get_current_url()
+        assert current_url == expected_url
