@@ -11,7 +11,7 @@ class OrderFeedPage(BasePage):
     def wait_for_orders_list(self):
 
         self.find_element(self.locators.ORDERS_LIST, timeout=10)
-        return self
+
 
     def open_first_order_details(self):
 

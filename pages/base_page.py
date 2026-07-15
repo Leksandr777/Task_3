@@ -54,7 +54,6 @@ class BasePage:
         return self.driver.execute_script(script, *args)
     
     def wait_until_backdrop_disappears(self, locator, timeout=10):
-        # Здесь живёт EC, в MainPage его не будет
         self.wait_until_not(
             EC.invisibility_of_element_located(locator),
             timeout=timeout
@@ -62,13 +61,11 @@ class BasePage:
 
 
     def wait_text_to_be_present_in_element(self, locator, text, timeout=10):
-        from selenium.webdriver.support import expected_conditions as EC
         return WebDriverWait(self.driver, timeout).until(
             EC.text_to_be_present_in_element(locator, text)
         )
     
     def wait_until_text_not_equal(self, locator, text, timeout=20):
-        from selenium.webdriver.support import expected_conditions as EC
         WebDriverWait(self.driver, timeout).until(
             lambda d: self.wait_until_visible(locator, timeout=1).text.strip() != text
         )
@@ -87,14 +84,12 @@ class BasePage:
 
 
     def find_elements(self, locator, timeout=10):
-        from selenium.webdriver.support import expected_conditions as EC
         return WebDriverWait(self.driver, timeout).until(
             EC.presence_of_all_elements_located(locator)
         )
     
 
     def wait_until_at_least_one_element(self, locator, timeout=30):
-        from selenium.webdriver.support import expected_conditions as EC
         WebDriverWait(self.driver, timeout).until(
             lambda d: len(self.find_elements(locator, timeout=1)) > 0
         )
@@ -102,3 +97,12 @@ class BasePage:
 
     def is_url_contains(self, substring):
         return substring in self.driver.current_url
+    
+    def is_element_present_now(self, locator):
+        by, value = locator
+        elements = self.driver.find_elements(by, value)
+        return len(elements) > 0
+
+    def get_password_input_value(self):
+        field = self.find_element(self.locators.PASSWORD_INPUT, timeout=5)
+        return field.get_attribute("value")

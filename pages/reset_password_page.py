@@ -11,7 +11,7 @@ class ResetPasswordPage(BasePage):
     def wait_for_page_load(self):
         self.find_element(self.locators.PASSWORD_INPUT, timeout=20)
         self.find_element(self.locators.SHOW_PASSWORD_BUTTON, timeout=20)
-        return self
+
 
     def enter_password(self, password):
         password_field = self.find_element(self.locators.PASSWORD_INPUT, timeout=10)
@@ -21,7 +21,16 @@ class ResetPasswordPage(BasePage):
     def click_show_password(self):
         show_button = self.wait_until_clickable(self.locators.SHOW_PASSWORD_BUTTON, timeout=10)
         show_button.click()
-        return self
+
     
     def get_password_input_element(self):
         return self.find_element(self.locators.PASSWORD_INPUT) 
+
+    def get_password_input_type(self):
+        field = self.find_element(self.locators.PASSWORD_INPUT, timeout=5)
+        return field.get_attribute("type")
+
+
+    def get_password_input_value(self):
+        field = self.find_element(self.locators.PASSWORD_INPUT, timeout=5)
+        return field.get_attribute("value")

@@ -9,6 +9,8 @@ import time
 from pages.login_page import LoginPage
 from pages.main_page import MainPage
 from pages.order_feed_page import OrderFeedPage
+from pages.reset_password_page import ResetPasswordPage
+from pages.password_recovery_page import PasswordRecoveryPage
 from helpers import create_user, delete_user
 
 @pytest.fixture(params=["chrome"])#, "firefox"
@@ -35,12 +37,16 @@ def setup_pages_and_user(request, browser):
     login_page = LoginPage(browser)
     main_page = MainPage(browser)
     order_feed_page = OrderFeedPage(browser) 
+    password_recovery_page = PasswordRecoveryPage(browser)
+    reset_password_page = ResetPasswordPage(browser)
     user = create_user()
 
     request.cls.login_page = login_page
     request.cls.main_page = main_page
     request.cls.user = user
     request.cls.order_feed_page = order_feed_page
+    request.cls.password_recovery_page = password_recovery_page
+    request.cls.reset_password_page = reset_password_page
     request.cls.driver = browser
 
     yield

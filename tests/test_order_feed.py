@@ -50,7 +50,7 @@ class TestOrderFeed:
     
     @allure.story("Проверка увеличения счётчиков заказов после создания заказа")
     def test_counter_orders(self):
-        # 1. Авторизация (методы LoginPage)
+
         self.login_page.open()
         self.login_page.enter_email(self.user['email'])
         self.login_page.enter_password(self.user['password'])
